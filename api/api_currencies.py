@@ -2,33 +2,9 @@ import json
 import requests
 
 
-from requests_toolbelt.multipart.encoder import MultipartEncoder
-
-
 class BillingApiCurrencies:
     def __init__(self):
         self.base_url = "https://api-gateway.dev.idynsys.org/api/billing-settings/"
-
-    # def get_internal_all_currencies(self, auth_key: json) -> json:
-    #     headers = {'auth_key': auth_key['access_token']}
-    #     res = requests.get(self.base_url + 'internal/currencies', headers=headers)
-    #     status = res.status_code
-    #     try:
-    #         result = res.json()
-    #     except json.decoder.JSONDecodeError:
-    #         result = res.text
-    #     return status, result
-    #
-    # def get_internal_specific_currencies(self, auth_key: json, iso_code: str) -> json:
-    #     headers = {'auth_key': auth_key['access_token']}
-    #     iso_code = {'iso_code': iso_code}
-    #     res = requests.get(self.base_url + 'internal/currencies', headers=headers, params=iso_code)
-    #     status = res.status_code
-    #     try:
-    #         result = res.json()
-    #     except json.decoder.JSONDecodeError:
-    #         result = res.text
-    #     return status, result
 
     def get_all_currencies(self, auth_key: json, page: str, limit: str, sort_column: str, sort_direction: str) -> json:
         headers = {'auth_key': auth_key['access_token']}
@@ -61,7 +37,8 @@ class BillingApiCurrencies:
             result = res.text
         return status, result
 
-    def post_add_currency(self, auth_key: json, currency_iso_code: str, currency_description: str, active: bool) -> json:
+    def post_add_currency(self, auth_key: json, currency_iso_code: str, currency_description: str, active: bool) -> \
+            json:
         data = {
                 "currencyIsoCode": currency_iso_code,
                 "currencyDescription": currency_description,

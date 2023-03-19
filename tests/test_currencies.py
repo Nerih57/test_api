@@ -8,28 +8,6 @@ get_token = BillingApiToken()
 currencies = BillingApiCurrencies()
 
 
-# def test_get_internal_all_currencies():
-#     """Метод возвращает список валют, доступных и активных для использования на платформе
-#     Ссылка на описание - https://gitlab.idynsys.org/wlb_project/b2b/b2b-sa-documentation/-/blob/main/Backend/Billing/
-#     currencies/endpoints/internal/getCurrencies.md#getcurrencies"""
-#     _, auth_key = get_token.get_api_key(user_data_valid)
-#     status, result = currencies.get_internal_all_currencies(auth_key)
-#     assert status == 200
-#     assert result['itemsList']
-#
-#
-# def test_get_internal_specific_currencies():
-#     """Метод получает информацию об одной валюте, доступной и активной для использования на платформе
-#     Ссылка на описание - https://gitlab.idynsys.org/wlb_project/b2b/b2b-sa-documentation/-/blob/main/Backend/Billing/
-#     currencies/endpoints/internal/getCurrencies.md#getcurrencies"""
-#     _, auth_key = get_token.get_api_key(user_data_valid)
-#     _, result = currencies.get_internal_all_currencies(auth_key)
-#     iso_code = result['itemsList'][0]['currencyIsoCode']
-#     status, result = currencies.get_internal_specific_currencies(auth_key, iso_code)
-#     assert status == 200
-#     assert len(result['itemsList']) > 0
-
-
 def test_all_currencies(page=number_page, limit=limit_data, sort_direction=sort_direction_for):
     """Метод находит и возвращает список валют, доступных для использования на платформе
     Ссылка на описание - https://gitlab.idynsys.org/wlb_project/b2b/b2b-sa-documentation/-/blob/main/Backend/Billing/
@@ -45,9 +23,6 @@ def test_all_currencies(page=number_page, limit=limit_data, sort_direction=sort_
     status, result = currencies.get_all_currencies(auth_key, page, limit[2], sort_column[2], sort_direction[0])
     assert status == 200
     assert len(result['itemsList']) > 0
-    # status, result = currencies.get_all_currencies(auth_key, ' ', ' ', ' ', ' ')
-    # assert status == 200
-    # assert len(result['itemsList']) > 0
 
 
 def test_absent_currencies():
