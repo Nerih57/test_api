@@ -146,7 +146,6 @@ def test_update_payment_method(is_active=active, page=number_page, limit=limit_d
     # Мало тестовых данных и отсутствует метод создания, пока закомментирую
     # existing_name = result['itemsList'][1]['paymentMethodName']
     status, result = payment_system.patch_update_payment_method(auth_key, name_pm, description, is_active[0], id_pm)
-    print(result)
     assert status == 200
     _, result = payment_system.get_info_payment_method(auth_key, id_pm)
     assert result['paymentMethodDescription'] == description and result['isActive'] == is_active[0] and \
@@ -238,12 +237,10 @@ def test_get_active_organization_for_ps(page=number_page, limit=limit_data, sort
     _, result = payment_system.get_all_payments_system(auth_key, page, limit[0], sort_column_for_ps[0],
                                                        sort_direction[0])
     id_ps = result['itemsList'][0]['id']
-    print(id_ps)
     status, result = payment_system.get_active_organization_for_ps(auth_key, id_ps)
     assert status == 200
     assert len(result['itemsList']) >= 0
     status, result = payment_system.get_active_organization_for_ps(auth_key, incorrect_id)
-    print(result)
     assert status == 200
     assert len(result['itemsList']) == 0
 
