@@ -58,7 +58,7 @@ class BillingApiPaymentSettings:
 
     def get_info_payment_method(self, auth_key: json, payment_method_id: str) -> json:
         headers = {'auth_key': auth_key['access_token']}
-        res = requests.get(self.base_url + 'payment-systems/payment-methods/' + str(payment_method_id), headers=headers)
+        res = requests.get(self.base_url + 'payment-system-methods/' + str(payment_method_id), headers=headers)
         status = res.status_code
         try:
             result = res.json()
@@ -66,15 +66,12 @@ class BillingApiPaymentSettings:
             result = res.text
         return status, result
 
-    def patch_update_payment_method(self, auth_key: json, payment_method_name: str, payment_method_description: str,
-                                    active: bool, payment_method_id: str) -> json:
+    def patch_update_payment_method(self, auth_key: json, active: bool, payment_method_id: str) -> json:
         data = {
-            "paymentSystemName": payment_method_name,
-            "paymentSystemDescription": payment_method_description,
             "isActive": active
         }
         headers = {'auth_key': auth_key['access_token']}
-        res = requests.patch(self.base_url + 'payment-systems/payment-methods/' + str(payment_method_id),
+        res = requests.patch(self.base_url + 'payment-system-methods/' + str(payment_method_id),
                              headers=headers, json=data)
         status = res.status_code
         try:

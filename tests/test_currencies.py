@@ -77,7 +77,6 @@ def test_info_currency(page=number_page, limit=limit_data, sort_direction=sort_d
     assert result['errorCode'] == 'CURRENCY_NOT_FOUND'
 
 
-@pytest.mark.xfail
 def test_update_currency(is_active=active, page=number_page, limit=limit_data, sort_direction=sort_direction_for,
                          incorrect_id=wrong_id):
     """Метод обновляет все поля для одного экземпляра валюты.
@@ -97,8 +96,8 @@ def test_update_currency(is_active=active, page=number_page, limit=limit_data, s
     _, result = currencies.get_info_currency(auth_key, id_currency)
     assert result['currencyDescription'] == description and result['isActive'] == is_active[1]
     status, result = currencies.patch_update_currency(auth_key, description, is_active[1], incorrect_id)
-    assert status == 409
-    assert result['errorCode'] == 'CURRENCY_NAME_NOT_UNIQUE'
+    assert status == 404
+    assert result['errorCode'] == 'CURRENCY_NOT_FOUND'
 
 
 def test_active_currencies():

@@ -55,7 +55,6 @@ def test_info_payment_system_account(page=number_page, limit=limit_data, sort_di
     assert result['errorCode'] == 'PAYMENT_SYSTEM_ACCOUNT_NOT_FOUND'
 
 
-@pytest.mark.xfail
 def test_post_add_payment_system_account(page=number_page, limit=limit_data, sort_direction=sort_direction_for,
                                          incorrect_id=wrong_id):
     """Метод добавляет одну учётную запись в платежной системе для одной организации
@@ -82,11 +81,11 @@ def test_post_add_payment_system_account(page=number_page, limit=limit_data, sor
     assert status == 409
     assert result['errorCode'] == 'PAYMENT_SYSTEM_ACCOUNT_NAME_NOT_UNIQUE'
     status, result = ps_account.post_add_ps_account(auth_key, name_psa, description, incorrect_id, id_ps)
-    assert status == 200
-    assert len(result) == 0
+    assert status == 409
+    assert result['errorCode'] == 'ORGANIZATION_NOT_FOUND'
     status, result = ps_account.post_add_ps_account(auth_key, name_psa, description, id_organization, incorrect_id)
-    assert status == 499
-    assert result['errorCode'] == 'COULD_NOT_SAVE_PAYMENT_SYSTEM_ORGANIZATION_ACCOUNTS'
+    assert status == 409
+    assert result['errorCode'] == 'PAYMENT_SYSTEM_NOT_FOUND'
 
 
 def test_update_payment_system_account(is_active=active, page=number_page, limit=limit_data,
@@ -132,19 +131,24 @@ def test_post_add_currency_account_for_psa(page=number_page, limit=limit_data, s
     _, auth_key = get_token.get_api_key(user_data_valid)
     _, result = currencies.get_active_currencies(auth_key)
     iso_currency = result['itemsList'][0]['currencyIsoCode']
+    name_currency = result['itemsList'][0]['currencyName']
     _, result = ps_account.get_all_payments_system_accounts(auth_key, page, limit[0], sort_column[0], sort_direction[0])
     id_psa = result['itemsList'][0]['id']
     status, result = ps_account.post_add_currency_for_ps_account(auth_key, name_currency_account, description,
                                                                  iso_currency, id_psa)
     assert status == 201
     assert len(result['id']) > 0
+    id_ca = result['id']
+    status, result = ps_account.get_info_currency_account_for_psa(auth_key, id_ca)
+    assert result['currencyName'] == name_currency and result['currencyIsoCode'] == iso_currency and \
+           result['currencyAccountName'] == name_currency_account and \
+           result['currencyAccountDescription'] == description
     status, result = ps_account.post_add_currency_for_ps_account(auth_key, name_currency_account, description,
                                                                  iso_currency, id_psa)
     assert status == 409
     assert result['errorCode'] == 'CURRENCY_ACCOUNT_NAME_NOT_UNIQUE'
     status, result = ps_account.post_add_currency_for_ps_account(auth_key, name_currency_account, description,
                                                                  iso_currency, incorrect_id)
-    print(result)
     assert status == 499
     assert result['errorCode'] == 'COULD_NOT_SAVE_CURRENCY_ACCOUNT'
 
