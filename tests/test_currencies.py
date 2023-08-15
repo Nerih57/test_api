@@ -1,8 +1,10 @@
+import random
 import pytest
 
+from datetime import datetime, timedelta
 from api.api_get_token import BillingApiToken
 from api.api_currencies import BillingApiCurrencies
-from settings import user_data_valid, number_page, limit_data, sort_direction_for, active, wrong_id
+from settings import user_data_valid, number_page, limit_data, sort_direction_for, active, wrong_id, wrong_iso_code
 
 get_token = BillingApiToken()
 currencies = BillingApiCurrencies()
@@ -108,3 +110,67 @@ def test_active_currencies():
     status, result = currencies.get_active_currencies(auth_key)
     assert status == 200
     assert len(result['itemsList']) > 0
+
+
+def test_add_currency_exchange_rate(current_time=active, page=number_page, limit=limit_data,
+                                    sort_direction=sort_direction_for):
+    """Метод добавляет обменный курс для валюты по коду описанному в стандарте ISO 4217
+    Ссылка на описание - https://gitlab.idynsys.org/wlb_project/b2b/analytics/b2b-sa-documentation/-/blob/main/Backend/
+    Billing/billing-settings/endpoints_currencies/addCurrencyExchangeRate.md"""
+    sort_column = ['currencyName', 'currencyIsoCode', 'isActive']
+    date = datetime.now() + (timedelta(hours=1))
+    date = date.astimezone().isoformat()
+    date_old = datetime.now() + (timedelta(hours=-1))
+    date_old = date_old.astimezone().isoformat()
+    rate = random.random()
+    rate_not_positive = 0
+    _, auth_key = get_token.get_api_key(user_data_valid)
+    _, result = currencies.get_all_currencies(auth_key, page, limit[0], sort_column[0], sort_direction[0])
+    iso_code = result['itemsList'][0]['currencyIsoCode']
+    status, result = currencies.post_add_exchange_rate(auth_key, date, current_time[0], iso_code, rate)
+    assert status == 201
+    assert len(result['id']) > 0
+    status, result = currencies.post_add_exchange_rate(auth_key, date, current_time[1], iso_code, rate)
+    assert status == 201
+    assert len(result['id']) > 0
+    status, result = currencies.post_add_exchange_rate(auth_key, date_old, current_time[0], iso_code, rate)
+    assert status == 400
+    assert result['errorCode'] == 'DATE_SHOULD_BE_IN_FUTURE'
+    status, result = currencies.post_add_exchange_rate(auth_key, date, current_time[0], iso_code, rate_not_positive)
+    assert status == 400
+    assert result['errorCode'] == 'SHOULD_BE_POSITIVE'
+
+
+def test_all_exchange_rates(page=number_page, limit=limit_data, sort_direction=sort_direction_for):
+    """Метод возвращает список обменных курсов для валюты по отношению к доллару
+    Ссылка на описание - https://gitlab.idynsys.org/wlb_project/b2b/analytics/b2b-sa-documentation/-/blob/main/Backend/
+    Billing/billing-settings/endpoints_currencies/getCurrencyExchangeRates.md"""
+    sort_column = ['currencyName', 'currencyIsoCode', 'isActive']
+    sort_column_rates = ['validFrom', 'dataSourceName']
+    _, auth_key = get_token.get_api_key(user_data_valid)
+    _, result = currencies.get_all_currencies(auth_key, page, limit[0], sort_column[0], sort_direction[0])
+    iso_code = result['itemsList'][0]['currencyIsoCode']
+    status, result = currencies.get_all_exchange_rates(auth_key, page, limit[0], sort_column_rates[0], sort_direction[0],
+                                                       iso_code)
+    assert status == 200
+    assert len(result['items']) > 0
+    status, result = currencies.get_all_exchange_rates(auth_key, page, limit[1], sort_column_rates[1], sort_direction[1],
+                                                       iso_code)
+    assert status == 200
+    assert len(result['items']) > 0
+
+
+def test_data_source_exchange_rates(page=number_page, limit=limit_data, sort_direction=sort_direction_for):
+    """Метод возвращает список обменных курсов для валюты по отношению к доллару
+    Ссылка на описание - https://gitlab.idynsys.org/wlb_project/b2b/analytics/b2b-sa-documentation/-/blob/main/Backend/
+    Billing/billing-settings/endpoints_currencies/getCurrencyExchangeRates.md"""
+    sort_column = ['currencyName', 'currencyIsoCode', 'isActive']
+    _, auth_key = get_token.get_api_key(user_data_valid)
+    _, result = currencies.get_all_currencies(auth_key, page, limit[0], sort_column[0], sort_direction[0])
+    iso_code = result['itemsList'][0]['currencyIsoCode']
+    status, result = currencies.get_data_source_exchange_rates(auth_key, iso_code)
+    assert status == 200
+    assert len(result['items']) > 0
+    status, result = currencies.get_data_source_exchange_rates(auth_key, wrong_iso_code)
+    assert status == 200
+    assert len(result['items']) == 0

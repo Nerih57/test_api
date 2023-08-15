@@ -1,10 +1,12 @@
 import json
 import requests
 
+from settings_private import base_url
+
 
 class BillingApiPaymentMethod:
     def __init__(self):
-        self.base_url = "https://api-gateway.dev.idynsys.org/api/billing-settings/"
+        self.base_url = base_url
 
     def get_all_payments_methods(self, auth_key: json, page: str, limit: str, sort_column: str, sort_direction: str):
         headers = {'auth_key': auth_key['access_token']}

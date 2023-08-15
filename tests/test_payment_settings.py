@@ -256,3 +256,50 @@ def test_get_payment_systems_for_organization(page=number_page, limit=limit_data
                                                                 sort_direction[0], incorrect_id)
     assert status == 200
     assert len(result['itemsList']) >= 0
+
+
+def test_filter_payment_methods_for_ps(page=number_page, limit=limit_data, is_active=active,
+                                       sort_direction=sort_direction_for):
+    """Метод возвращает список платежных методов
+    Ссылка на описание - https://gitlab.idynsys.org/wlb_project/b2b/analytics/b2b-sa-documentation/-/blob/main/Backend/
+    Billing/billing-settings/endpoints_payment_settings/getPaymentMethods.md#getpaymentmethods"""
+    sort_column_for_ps = ['paymentSystemName', 'paymentMethodsCount', 'isActive']
+    _, auth_key = get_token.get_api_key(user_data_valid)
+    _, result = payment_system.get_all_payments_system(auth_key, page, limit[0], sort_column_for_ps[0],
+                                                       sort_direction[0])
+    id_ps = result['itemsList'][0]['id']
+    status, result = payment_system.get_filter_payments_methods_for_ps(auth_key, page, limit[0], is_active[0], id_ps)
+    assert status == 200
+    assert len(result['items']) >= 0
+    status, result = payment_system.get_filter_payments_methods_for_ps(auth_key, page, limit[0], is_active[1], id_ps)
+    assert status == 200
+    assert len(result['items']) >= 0
+
+
+def test_filter_organization_for_ps(page=number_page, limit=limit_data, sort_direction=sort_direction_for,
+                                    is_active=active):
+    """Метод возвращает список организаций для одной платежной системы с признаком активации
+    Ссылка на описание - https://gitlab.idynsys.org/wlb_project/b2b/analytics/b2b-sa-documentation/-/blob/main/Backend/
+    Billing/billing-settings/endpoints_payment_settings/getPaymentSystemOrganizations.md"""
+    organization_type = ['exploitation_team', 'vendor', 'platform']
+    sort_column_for_ps = ['paymentSystemName', 'paymentMethodsCount', 'isActive']
+    _, auth_key = get_token.get_api_key(user_data_valid)
+    _, result = payment_system.get_all_payments_system(auth_key, page, limit[0], sort_column_for_ps[0],
+                                                       sort_direction[0])
+    id_ps = result['itemsList'][0]['id']
+    status, result = payment_system.get_filter_organization_for_ps(auth_key, page, limit[0], is_active[0],
+                                                                   organization_type[0], id_ps)
+    assert status == 200
+    assert len(result['itemsList']) >= 0
+    status, result = payment_system.get_filter_organization_for_ps(auth_key, page, limit[0], is_active[1],
+                                                                   organization_type[1], id_ps)
+    assert status == 200
+    assert len(result['itemsList']) >= 0
+    status, result = payment_system.get_filter_organization_for_ps(auth_key, page, limit[0], is_active[0:1],
+                                                                   organization_type[2], id_ps)
+    assert status == 200
+    assert len(result['itemsList']) >= 0
+    status, result = payment_system.get_filter_organization_for_ps(auth_key, page, limit[0], is_active[0],
+                                                                   organization_type[0:2], id_ps)
+    assert status == 200
+    assert len(result['itemsList']) >= 0

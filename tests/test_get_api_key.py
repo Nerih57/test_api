@@ -1,5 +1,5 @@
 from api.api_get_token import BillingApiToken
-from settings import user_data_valid
+from settings_private import user_data_valid
 
 billing_api = BillingApiToken()
 
